@@ -196,10 +196,15 @@
         }
 
         .msg.user {
-            background: linear-gradient(135deg, var(--primary), #2563eb);
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
             align-self: flex-end;
             border-bottom-right-radius: 4px;
-            color: white;
+            color: #ffffff;
+        }
+
+        .msg.user .msg-text {
+            color: #ffffff;
+            font-size: 0.9rem;
         }
 
         .msg.agent {
@@ -267,6 +272,7 @@
 
         .input-form {
             display: flex;
+            align-items: flex-end;
             gap: 8px;
         }
 
@@ -279,8 +285,12 @@
             color: var(--text);
             font-family: inherit;
             font-size: 0.95rem;
-            transition: all 0.2s ease;
+            line-height: 1.4;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
             outline: none;
+            resize: none;
+            overflow-y: auto;
+            max-height: 160px;
         }
 
         .input-field:focus {
@@ -391,13 +401,13 @@
 
                 <div class="input-container">
                     <form class="input-form" id="planForm">
-                        <input 
-                            type="text" 
-                            class="input-field" 
-                            id="promptInput" 
+                        <textarea
+                            class="input-field"
+                            id="promptInput"
+                            rows="1"
                             placeholder="Plan a 5-day luxury trip to Dubai..."
                             autocomplete="off"
-                        >
+                        >Plan a 3-day trip to Goa. $800 budget. Love beaches and seafood, hate crowds.</textarea>
                         <button type="submit" class="btn-send" id="sendBtn">Plan</button>
                     </form>
                 </div>
@@ -423,6 +433,23 @@
         const statusText = document.getElementById('statusText');
         const emptyState = document.getElementById('emptyState');
         const itineraryContent = document.getElementById('itineraryContent');
+
+        // Grow the prompt box to fit its text so the whole prompt stays visible
+        function autoResize() {
+            promptInput.style.height = 'auto';
+            promptInput.style.height = promptInput.scrollHeight + 2 + 'px';
+        }
+        promptInput.addEventListener('input', autoResize);
+        window.addEventListener('resize', autoResize);
+        autoResize();
+
+        // Enter submits, Shift+Enter adds a new line
+        promptInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                planForm.requestSubmit();
+            }
+        });
 
         const AGENT_LABELS = {
             orchestrator: '🎯 Orchestrator',
@@ -523,6 +550,7 @@
 
             addMessage('user', prompt);
             promptInput.value = '';
+            autoResize();
             sendBtn.disabled = true;
             promptInput.disabled = true;
 
